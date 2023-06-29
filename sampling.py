@@ -20,10 +20,9 @@ class EulerMaruyamaPredictor(Predictor):
     def update_fn(self, t, x):
         dt = 1. / self.sde.N
         z = torch.randn(x.shape)
-        drift, diffusion = self.sde.sde_coeff(t, x)
-        x_mean = x + dt * drift
-        x = x_mean + diffusion * (z * (dt ** 0.5))
-        return x, x_mean
+        f, g = self.sde.sde_coeff(t, x)
+        x = x + f*dt + g*self.sde.dw(x)
+        return x
 
 class Sampler():
 
@@ -43,7 +42,7 @@ class Sampler():
             with torch.no_grad():
                 for i, t in enumerate(tqdm(timesteps, desc='sampling')):
                     t_vec = torch.ones(x.shape[0]) * t
-                    x, _ = update_fn(t_vec, x)
+                    x = update_fn(t_vec, x)
                     x_hist[i] = x
 
             out = x

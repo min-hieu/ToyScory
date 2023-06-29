@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 
 class PositionalEncoding(nn.Module):
+
     def __init__(self, t_channel):
         super().__init__()
         half_dim = t_channel // 2
@@ -15,7 +16,9 @@ class PositionalEncoding(nn.Module):
         emb = torch.cat((emb.sin(), emb.cos()), dim=1)
         return emb
 
+
 class MLP(nn.Module):
+
     def __init__(self, in_dim, out_dim, hid_shapes):
         super().__init__()
         layers = [nn.Linear(in_dim, hid_shapes[0]), nn.ReLU()]
@@ -27,14 +30,15 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+
 class Naive(nn.Module):
 
     def __init__(self, in_dim, enc_shapes, dec_shapes, z_dim):
         super().__init__()
-        self.pe = PositionalEncoding(z_dim)
+        self.pe    = PositionalEncoding(z_dim)
         self.x_enc = MLP(in_dim, z_dim, enc_shapes)
         self.t_enc = MLP(z_dim, z_dim, enc_shapes)
-        self.dec = MLP(2*z_dim, in_dim, dec_shapes)
+        self.dec   = MLP(2*z_dim, in_dim, dec_shapes)
 
     def forward(self, t, x):
         temb = self.pe(t)
@@ -43,3 +47,10 @@ class Naive(nn.Module):
         h = torch.cat([xemb, temb], -1)
 
         return -self.dec(h)
+
+
+class UNet(nn.Module):
+
+    def __init__
+
+

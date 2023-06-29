@@ -1,9 +1,9 @@
 import torch
 from tqdm import tqdm
 from itertools import repeat
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
-def get_step_fn(loss_fn, optimizer, ema, sde, model):
+def get_step_fn(loss_fn, optimizer, ema, sde, model, bridge=False):
     def step_fn(batch):
         # uniformly sample time step
         t = sde.T*torch.rand(batch.shape[0])
@@ -29,7 +29,13 @@ def get_step_fn(loss_fn, optimizer, ema, sde, model):
 
         return loss.item()
 
-    return step_fn
+    def step_fn_bridge(batch, dir):
+
+    if not bridge:
+        return step_fn
+    else:
+        return step_fn
+
 
 
 def repeater(data_loader):
@@ -51,7 +57,7 @@ def train_diffusion(dataloader, step_fn, N_steps, plot=False):
         if step % log_freq == 0:
             loss_history[i//log_freq] = loss
             pbar.set_description("Loss: {:.3f}".format(loss))
-            
+
     if plot:
         plt.plot(range(len(loss_history)), loss_history)
         plt.show()
