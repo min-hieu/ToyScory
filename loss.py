@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
 
+
 def sample_rademacher_like(x):
     return torch.randint(low=0, high=2, size=x.shape).to(x) * 2 - 1
+
 
 def sample_gaussian_like(x):
     return torch.randn_like(x)
@@ -14,16 +16,18 @@ def sample_e(noise_type, x):
         'rademacher': sample_rademacher_like,
     }.get(noise_type)(x)
 
+
 def get_div_approx(y, x, noise_type):
     e = sample_e(noise_type, x)
     e_dydx = torch.autograd.grad(y, x, e, create_graph=True)[0]
     div_y = e_dydx * e
     return div_y
 
+
 def get_div_exact(y, x):
-    jac = torch.autograd.functional.jacobian(y,x)
-    div_y = torch.trace(jac)
-    return div_y
+    # TODO
+    pass
+
 
 class DSMLoss():
 
@@ -43,6 +47,7 @@ class DSMLoss():
         loss = loss.mean()
         return loss
 
+
 class ISMLoss():
 
     def __init__(self, alpha: float, diff_weight: bool):
@@ -59,15 +64,27 @@ class ISMLoss():
         return loss
 
 
-class DDPMLoss():
+class SBNLLJointLoss():
 
     def __init__(self):
-        # TODO
-        return
+        pass
 
-    def __call__(self):
-        # TODO
-        return
+    def __call__(self, t, xf, zf, zb_fn):
+        zb = zb_fn(t, xf)
+        div_gzb = get_div_approx(zb, xf, 'gaussian')
+        loss = 0.5 * (zf+zb)**2 + div_gzb
+        loss = (loss * sb.dt) / xf
+        loss =
+
+
+class SBNLLAlterLoss():
+
+    def __init__(self):
+        pass
+
+    def __call__(self, t, xf, zf, zb_fn):
+        pass
+
 
 class EDMLoss():
 
